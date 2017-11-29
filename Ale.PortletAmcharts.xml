@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-11-28 15:59:24">
+<Class name="Ale.PortletAmcharts">
+<Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
+<TimeChanged>64615,57451.163872</TimeChanged>
+<TimeCreated>64594,80930.104007</TimeCreated>
+
+<Parameter name="INCLUDEFILES">
+<Description>
+Parameter INCLUDEFILES = "script:https://www.amcharts.com/lib/3/themes/light.js,script:https://www.amcharts.com/lib/3/amcharts.js,script:https://www.amcharts.com/lib/3/serial.js,script:https://www.amcharts.com/lib/3/plugins/export/export.min.js,script:https://www.amcharts.com/lib/3/plugins/export/export.js";</Description>
+<Default>https://www.amcharts.com/lib/3/amcharts.js,https://www.amcharts.com/lib/3/serial.js,https://d3js.org/d3.v3.min.js,https://www.amcharts.com/lib/3/plugins/export/export.js,https://www.amcharts.com/lib/3/plugins/export/export.css</Default>
+</Parameter>
+
+<Parameter name="JSINCLUDES">
+<Default>zenCSLM.js,DeepSee.js,https://www.amcharts.com/lib/3/plugins/export/export.js</Default>
+</Parameter>
+
+<Property name="chartheight">
+<Description>
+Chart height (percentage of widget)</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="chartwidth">
+<Description>
+Chart width (percentage of widget)</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="fillalphas">
+<Description>
+Area Transparency Setting</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="linecolor">
+<Description>
+Line color</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="fillcolor">
+<Description>
+Chart color</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="bullet">
+<Description>
+Bullet shape</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="bulletsize">
+<Description>
+Bullet size</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="amchartsexport">
+<Description>
+Enable Export of chart</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Method name="%OnGetPortletName">
+<Description>
+Return the localized caption of this portlet.
+This is displayed in the Widget Builder dialog.
+This should be overridden in subclasses.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Quit "PortletAmcharts"
+]]></Implementation>
+</Method>
+
+<Method name="%OnGetPortletSettings">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[*pInfo:%List,&pSettings]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ Kill pInfo
+ Set pInfo($I(pInfo)) = $LB("CHARTHEIGHT","100","%Integer","% Chart height","Chart height (percentage of widget)")
+ Set pInfo($I(pInfo)) = $LB("CHARTWIDTH","100","%Integer","% Chart width","Chart width (percentage of widget)")
+ Set pInfo($I(pInfo)) = $LB("FILLALPHAS","0.5","%Numeric","Area Transparency","Set the transparency of the area plot [0 to 1]")
+ Set pInfo($I(pInfo)) = $LB("LINECOLOR","red","DRILL^Red:red,Black:black,Blue:blue,Purple:purple,Yellow:yellow,Green:green","Line Color","Line color")
+ Set pInfo($I(pInfo)) = $LB("FILLCOLOR","red","DRILL^Red:red,Blue:blue,Purple:purple,Yellow:yellow,Green:green","Chart Color","Chart color")
+ Set pInfo($I(pInfo)) = $LB("BULLET","red","DRILL^none:none,round:round,square:square,triangleUp:triangleUp,triangleDown:triangleDown,bubble:bubble","Bullet","Bullet shape")
+ Set pInfo($I(pInfo)) = $LB("BULLETSIZE","6","%Integer","Bullet size","Size of bullet in the chart")
+ Set pInfo($I(pInfo)) = $LB("AMEXPORT","false","ENUM^true:1,false:0","Enable Export","Enable Export") 
+ Quit pInfo
+]]></Implementation>
+</Method>
+
+<Method name="onApplyFilters">
+<Description>
+When filters get applied to the portlet, re-query the data from the pivot with the appropriate new filters in place.</Description>
+<FormalSpec>refresh,widget</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	console.log('onApplyFilters')    
+    //widget.applyFilters(false) //infinite loop with onApplyFilters, with both true and false
+	var portlet = widget.findComponent('portlet');
+   	this.renderContents(widget,portlet);
+]]></Implementation>
+</Method>
+
+<Method name="%DrawHTML">
+<Implementation><![CDATA[
+  //In a portlet that accesses data do nothing but force a modification of the renderFlag property
+  Set ..renderFlag = ..renderFlag + 1
+  //Settings: they will be available in renderContent (and drawChart) as e.g. this.fillalphas
+  Set ..fillalphas = ..settings("FILLALPHAS")
+  Set ..amchartsexport = ..settings("AMEXPORT")
+  Set ..chartheight = ..settings("CHARTHEIGHT")
+  Set ..chartwidth = ..settings("CHARTWIDTH")
+  Set ..fillcolor = ..settings("FILLCOLOR")
+  Set ..bullet = ..settings("BULLET")
+  Set ..bulletsize = ..settings("BULLETSIZE")
+  //Show a message while loading
+  &html< <div id="chartdiv">Content is loading...</div>	>
+]]></Implementation>
+</Method>
+
+<Method name="renderContents">
+<FormalSpec>widget,portlet</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	console.log('renderContents')
+	console.log(arguments.callee.caller);
+	//Get the widget and portlet objects
+	var widgetIdArray = this.id.split("/")
+	var widgetId = widgetIdArray[0]
+	if (!widget) {
+		widget = zen(widgetId);
+	}
+	if (!portlet) {
+		portlet = widget.findComponent('portlet');
+	}
+	//Quit if the portlet object was not found. This happens during the initial server load 
+	//when renderContents gets called before it is time to load the data
+	if (!portlet) {		
+		this.getEnclosingDiv().innerHTML = "";
+		return true;
+	}
+	var portletId = portlet.id
+    //Get the widget's data controller to get to the source data in the pivot
+    var controller = this.getController();
+    if (null == controller) {
+        this.connectToController();
+        controller = this.getController();
+    }
+	//Get the chartdiv div created in %DrawHTML
+	var chartdiv = document.getElementById('chartdiv');
+	chartdiv.style.width = this.chartwidth+'%';
+    chartdiv.style.height = this.chartheight+'%';
+    chartdiv.style.visibility = 'visible'
+	//Initialize variables to create a connection
+	var query = controller.GetCurrentQueryText();
+	console.log('The MDX query is:\n'+query)
+    var host = 'http://' + window.location.host;
+    var connection = new DeepSeeConnection("","",host,"/api/deepsee/v1","SAMPLES");
+    //Create the DeepSeeResultSet object with the connection..
+    var resultSet = new DeepSeeResultSet(connection,widgetId);
+    //..which uses the drawChart method to go throught the results and create the Amcharts chart in chartdiv
+    //Notice that .bind is used to pass the scope of renderContents to drawChart    
+    resultSet.runMDXQuery(query,this.drawChart.bind(this), this.drawChart.bind(this));
+    //I find that the previous responds better than this:
+    //resultSet.runMDXQuery(query,this.drawChart.bind(this));
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*ClientMethod pendingCallback() [ Language = javascript ]
+{
+	var p = document.createElement('p');
+	p.textContent="No data!"
+    p.style.visibility = 'visible';	
+	var div=document.getElementById('chartdiv')
+	div.innerHTML = ""
+	div.appendChild(p)
+}*/
+]]></Content>
+</UDLText>
+
+<Method name="drawChart">
+<FormalSpec>resultSet</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	console.log('drawChart')
+	console.log(arguments.callee.caller.caller.caller);
+	//window.caller=arguments.callee.caller
+	
+	var chartDataPoint;
+	var chartLabel;
+	var chartData = [];
+	//Populate chartData needed for AmCharts from resultSet
+	console.time('resultSet loop');
+	for (var i = 1; i <= resultSet.getRowCount(); ++i) {
+		for (var j = 1; j <= resultSet.getColumnCount(); ++j) {
+			chartDataPoint = resultSet.getOrdinalValue(i,j);
+			chartLabel = resultSet.getOrdinalLabel(2,i); //label of member on rows
+			chartData[chartData.length] = { "date":chartLabel[0],"y":chartDataPoint};
+		}
+	}
+	//If no data, get rid of data array containg empty/undefined values
+	if ((resultSet.parsedData.Result.CellData.length == 1) && (resultSet.parsedData.Result.CellData[0]["ValueLogical"]=="")) {
+		chartData=[];
+	}
+	console.timeEnd('resultSet loop');
+	console.log(chartData)
+	var columnLabel = resultSet.getOrdinalLabel(1,1);
+	//AmChart code	
+	if (typeof AmCharts=="undefined")  { 
+		alert('Please download amCharts JavaScript Charts (http://www.amcharts.com/download/) and place the "amcharts" directory in /csp/broker/  ');
+		return;
+	}
+	var chart = AmCharts.makeChart("chartdiv", {
+		"type": "serial",
+		"theme": "light",
+		"marginRight": 80,
+		"dataProvider": chartData,
+		"valueAxes": [{
+			"position": "left",
+			"title": columnLabel,
+			"minimum":0,
+			"maximum":"undefined",
+			"showFirstLabel": true,
+			"autoGridCount": true,
+			"labelFrequency": 2
+		}],
+		"graphs": [{
+			"id": "g1",
+			"lineThickness": 2,
+			"bullet": this.bullet,
+			"bulletSize": this.bulletsize,
+			"lineColor": this.linecolor,
+			"fillColors": this.fillcolor,
+			"fillAlphas": this.fillalphas,
+			"valueField": "y",
+			"balloonText": "<div style='margin:5px; font-size:19px;'>"+columnLabel+": <b>[[value]]</b></div>"
+		}],
+		"chartScrollbar": {
+			"graph": "g1",
+			"scrollbarHeight": 30,
+			"backgroundAlpha": 0,
+			"selectedBackgroundAlpha": 0.1,
+			"selectedBackgroundColor": "#888888", //Gray background
+			"graphFillAlpha": 0,
+			"graphLineAlpha": 0.5,
+			"selectedGraphFillAlpha": 0,
+			"selectedGraphLineAlpha": 1,
+			"autoGridCount": true,
+			"color": "#AAAAAA"
+		},
+		"chartCursor": {
+			"categoryBalloonDateFormat": "JJ:NN, DD MMMM", //Hours:Minute, Day Month
+			"cursorPosition": "mouse"
+		},
+		"categoryField": "date",
+		"categoryAxis": {
+			"minPeriod": "mm",
+			"parseDates": true,
+			"showFirstLabel": false
+		},
+		"export": {
+			"enabled": this.amchartsexport,
+			"dateFormat": "YYYY-MM-DD HH:NN:SS"
+		}
+	});
+	/*
+	chart.addListener("dataUpdated", zoomChart);
+	// when we apply theme, the dataUpdated event is fired even before we add listener, so
+	// we need to call zoomChart here
+	zoomChart();
+	// this method is called when chart is first inited as we listen for "dataUpdated" event
+	function zoomChart() {
+		// different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+		chart.zoomToIndexes(chartData.length - 250, chartData.length - 100);
+	}
+	*/
+	if (chart.dataProvider === undefined || chart.dataProvider.length === 0) {
+		chart.addLabel("50%", "50%", "The chart contains no data", "middle", 15);
+	}
+]]></Implementation>
+</Method>
+
+<Method name="%OnGetPortletIcon">
+<Description>
+URL of the icon for this portlet displayed in the Widget Builder dialog.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Quit "https://avatars1.githubusercontent.com/u/6652854?s=460&v=4"
+]]></Implementation>
+</Method>
+</Class>
+</Export>

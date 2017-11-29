@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-11-28 16:10:19">
+<Class name="Ale.Source">
+<Description>
+W ##class(Ale.Source).GenerateData(1000,90)
+W ##class(Ale.Source).Build()</Description>
+<Super>%Persistent</Super>
+<System>4</System>
+<TimeChanged>64600,35200</TimeChanged>
+<TimeCreated>64587,45961.712596</TimeCreated>
+
+<Parameter name="DSTIME">
+<Default>AUTO</Default>
+</Parameter>
+
+<Parameter name="DSINTERVAL">
+<Default>5</Default>
+</Parameter>
+
+<Property name="ID">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="MyDate">
+<Type>%DataType</Type>
+</Property>
+
+<Property name="ResultNumeric">
+<Description>
+Property Time As %Time;</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="ResultID">
+<Type>%Integer</Type>
+</Property>
+
+<Method name="Info">
+<Description>
+Print help
+W ##class(Ale.Source).Help()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	W !,?2,"W ##class(Ale.Source).GenerateData(1000,daysago=90)"
+	W !,?6,"generates the facts by calling: ..%%DeleteExtent and ..GetFacts()"
+	W !,?2,"W ##class(Ale.Source).GetFacts(facts=1000,daysago=90,DeleteExtent = 1)"
+	W !,?6,"generates the facts from by default 90 days ago"
+	W !,?2,"W ##class(Ale.Source).GetCount()"
+	W !,?6,"Get the number of source facts"	
+	W !,?2,"W ##class(Ale.Source).Build()"
+	W !,?6,"builds the SourceCube cube by calling: Set status = ##class(%DeepSee.Utils).%BuildCube(""SourceCube"")"
+	W !,?2,"W ##class(Ale.Source).Synchronize()"
+	W !,?6,"synchronizes the SourceCube cube by calling: Set status = ##class(%DeepSee.Utils).%SynchronizeCube(""SourceCube"")"
+	W !,?6,"NB: %DeleteExtent is not called"
+	W !
+	W !,?2,"NB: Ale.Source has DSTIME=""AUTO"". Useful commands:"
+	W !,?2,"ZW ^OBJ.DSTIME(""Ale.Source"")"
+	W !,?2,"W ##class(Ale.Source).%DeleteExtent()"
+	W !
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GenerateData">
+<Description>
+Generate the source data
+W ##class(Ale.Source).GenerateData()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>nfacts:%Integer=1000,daysago:%Integer=90</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set status=$$$OK
+    Write !, "Deleting Ale.Source data..."
+    //First Delete extent of child tables (none for this cube)
+    //Do ..%KillExtent() //This does not call %DeleteId and therefore change is not recorded in OBJ.DSTIME
+    Do ..%DeleteExtent()
+    
+    Write !, "Adding facts to Ale.Source..."
+	Set status=..GetFacts(nfacts,daysago,1)
+    Quit status
+]]></Implementation>
+</Method>
+
+<Method name="GetFacts">
+<Description>
+Do ##class(Ale.Source).GetFacts(1000,90,1) and then build the Erdbeben cube</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>nfacts:%Integer=1000,daysago:%Integer=90,deleteExtent:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If (deleteExtent)	D ..%DeleteExtent()
+	//If (killExtent)	D ..%KillExtent() //This does not call %DeleteId and therefore change is not recorded in OBJ.DSTIME
+	Set Htoday=$H
+	For n = 1:1:nfacts {
+		W:((n#5000)=0) $C(13,27)_"[0J"_"Facts built: "_n
+		Set fact=##class(Ale.Source).%New()
+    	Set fact.ID=n    	
+    	Set fact.MyDate=(Htoday-daysago+$R(daysago)+1)_","_$ZTIMEH($R(24)_":"_$R(60)_":00")
+    	Set fact.ResultNumeric=$R(3)+1   		// <- cardinality here	
+    	Set fact.ResultID=$R(100) 				// <- cardinality here
+ 		Set status=fact.%Save()
+	}
+	If $$$ISERR(status) {Do $System.Status.DisplayError(status) Write !, "Ale.Source save error"}
+	Write !
+    Write nfacts," facts stored in Ale.Source"
+    Quit status
+]]></Implementation>
+</Method>
+
+<Method name="GetCount">
+<Description>
+Get the fact count
+W ##class(Ale.Source).GetCount()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	Set status=$$$OK
+   	//Get the number of facts
+    Set myquery="SELECT Count(*) as RecCount FROM Ale.Source"
+    Set rset=##class(%ResultSet).%New("%DynamicQuery:SQL")
+    Set status=rset.Prepare(myquery)
+    If $$$ISERR(status) {Do $System.Status.DisplayError(status) Quit}
+    Set status=rset.Execute()    
+    If $$$ISERR(status) {Do $System.Status.DisplayError(status) Write !, "error with query" Quit}
+    Set reccount=0
+    Do rset.Next()
+    Quit rset.Data("RecCount")
+]]></Implementation>
+</Method>
+
+<Method name="Build">
+<Description>
+Build the SourceCube cube</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set status = ##class(%DeepSee.Utils).%BuildCube("SourceCube")
+	Quit status
+]]></Implementation>
+</Method>
+
+<Method name="Synchronize">
+<Description>
+Synchronize the SourceCube cube</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set status = ##class(%DeepSee.Utils).%SynchronizeCube("SourceCube")
+	Quit status
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Ale.SourceD</DataLocation>
+<DefaultData>SourceDefaultData</DefaultData>
+<IdLocation>^Ale.SourceD</IdLocation>
+<IndexLocation>^Ale.SourceI</IndexLocation>
+<StreamLocation>^Ale.SourceS</StreamLocation>
+<Data name="SourceDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ID</Value>
+</Value>
+<Value name="3">
+<Value>MyDate</Value>
+</Value>
+<Value name="4">
+<Value>ResultNumeric</Value>
+</Value>
+<Value name="5">
+<Value>ResultID</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="Ale.SourceCube">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%DeepSee.CubeDefinition</Super>
+<TimeChanged>64594,53273.934024</TimeChanged>
+<TimeCreated>64587,46017.728404</TimeCreated>
+<DependsOn>Ale.Source</DependsOn>
+
+<XData name="Cube">
+<Description>
+Cube definition from Architect.</Description>
+<XMLNamespace>http://www.intersystems.com/deepsee</XMLNamespace>
+<Data><![CDATA[
+<cube xmlns="http://www.intersystems.com/deepsee" name="SourceCube" displayName="SourceCube" disabled="false" abstract="false" sourceClass="Ale.Source" countMeasureName="%COUNT" bucketSize="8" bitmapChunkInMemory="false" precompute="0" disableListingGroups="false">
+  <dimension name="ID" disabled="false" hasAll="false" allCaption="All ID" allDisplayName="ID" type="data" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="ID" disabled="false" sourceProperty="ID" list="false" useDisplayValue="true" sort="asc numeric" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="ResultID" disabled="false" hasAll="false" allCaption="All ResultID" allDisplayName="ResultID" type="data" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="ResultID" disabled="false" sourceProperty="ResultID" list="false" useDisplayValue="true" sort="asc numeric" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="ResultNumeric" disabled="false" hasAll="false" allCaption="All ResultNumeric" allDisplayName="ResultNumeric" type="data" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="ResultNumeric" disabled="false" sourceProperty="ResultNumeric" list="false" useDisplayValue="true" sort="asc numeric" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="ComputedD" displayName="ComputedD" disabled="false" hasAll="false" type="computed" dimensionClass="%DeepSee.ComputedDimension.SQL" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" displayName="H1" disabled="false" hidden="false">
+      <level name="ComputedSQLCall" displayName="ComputedSQLCall" disabled="false" list="false" useDisplayValue="false" useAsFilter="true" hidden="false">
+        <member name="TestSQLProc" displayName="TestSQLProc" description="CALL Ale.SourceCube_TestSQLProc()" disabled="false" spec="CALL Ale.SourceCube_TestSQLProc()">
+        </member>
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="MyDate" disabled="false" hasAll="true" allCaption="All Date" allDisplayName="All Date" sourceProperty="MyDate" type="time" calendar="gregorian" iKnowType="entity" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="Year" disabled="false" timeFunction="Year" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+      <level name="Month" disabled="false" timeFunction="MonthYear" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+      <level name="Day" disabled="false" timeFunction="DayMonthYear" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="Time" disabled="false" hasAll="false" allCaption="All Time" allDisplayName="Time" sourceProperty="MyDate" type="time" calendar="gregorian" iKnowType="entity" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="HourNumber" disabled="false" timeFunction="HourNumber" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+      <level name="MinuteNumber" disabled="false" timeFunction="MinuteNumber" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <dimension name="TimeDataDim" disabled="false" hasAll="false" allCaption="All MyDate1" allDisplayName="MyDate1" type="data" calendar="gregorian" iKnowType="entity" hidden="false" showHierarchies="default">
+    <hierarchy name="H1" disabled="false" hidden="false">
+      <level name="YMD hms" disabled="false" sourceExpression="$ZDT(%source.MyDate,3)" list="false" useDisplayValue="true" useAsFilter="true" hidden="false">
+      </level>
+    </hierarchy>
+  </dimension>
+  <measure name="ResultNumeric" disabled="false" sourceProperty="ResultNumeric" aggregate="SUM" type="number" hidden="false" searchable="false">
+  </measure>
+  <measure name="ResultID" disabled="false" sourceProperty="ResultID" aggregate="SUM" type="number" hidden="false" searchable="false">
+  </measure>
+  <listing name="Listing" disabled="false" listingType="table" fieldList="%ID,ResultID,ResultNumeric,MyDate">
+  </listing>
+</cube>
+]]></Data>
+</XData>
+
+<Method name="TestSQLProc">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<ReturnResultsets>1</ReturnResultsets>
+<Implementation><![CDATA[
+	Set ^Ale($I(^Ale), "TestSQLProc") = ""
+    // Note that %sqlcontext is created when SQLPROC is defined    
+    Try {
+        Set rc = 1
+		Set sql = "select ID from Ale_SourceCube.Fact where DxID > 500"
+        Set st = ##class(%SQL.Statement).%New()
+        Set sc = st.%Prepare(sql)
+        If ($$$ISERR(sc)) {
+			Throw ##class(%Exception.StatusException).CreateFromStatus(sc)
+        }
+        Set rs = st.%Execute()
+        Do %sqlcontext.AddResultSet(rs)
+    }
+    Catch(ex) {
+        Set %sqlcontext.%SQLCODE = ex.AsSQLCODE()
+        Set %sqlcontext.%Message = ex.SQLMessageString()
+        Set rc = ex.DisplayString()
+    }
+]]></Implementation>
+</Method>
+
+<Method name="FilterDates">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<ReturnResultsets>1</ReturnResultsets>
+<Implementation><![CDATA[	Quit 0
+]]></Implementation>
+</Method>
+
+<Parameter name="DOMAIN">
+</Parameter>
+</Class>
+
+
+<Document name="SourceCube.pivot.DFI">
+<pivot xmlns="http://www.intersystems.com/deepsee/library" name="SourceCube" folderName="" title="" description="" keywords="" owner="" shared="true" public="true" locked="false" resource="" timeCreated="2017-10-31T16:50:55.101Z" createdBy="UnknownUser" category="" bookCover="" mdx="" cellWidth="120" columnHeaderStyle="" rowHeaderStyle="" cellStyle="" rowLabelSpan="true" columnLabelSpan="true" cellHeight="22" showEmptyRows="false" showEmptyColumns="false" cubeName="SOURCECUBE" caption="" listing="" listingRows="" showStatus="true" pageSize="100" colorScale="" rowTotals="false" columnTotals="false" rowTotalAgg="sum" columnTotalAgg="sum" rowTotalSource="page" showZebra="false" showRowCaption="true" printTitle="" printSubtitle="" printSubtitleOn="" showUser="" printPageSize="" printOrientation="1" printMarginTop="" printMarginLeft="" printMarginRight="" printMarginBottom="" printLabelWidth="" printCellWidth="" autoExecute="true" manualMode="false" userMDX="" chartMarginTop="" chartMarginLeft="" chartMarginRight="" chartMarginBottom="" maxRows="" borderLeftCell="" borderRightCell="" borderTopCell="" borderBottomCell="" borderLeftCol="" borderRightCol="" borderTopCol="" borderBottomCol="" borderLeftRow="" borderRightRow="" borderTopRow="" borderBottomRow="" fontFamilyCell="" fontSizeCell="" fontFamilyCol="" fontSizeCol="" fontFamilyRow="" fontSizeRow="" showFilters="" showListingFilters="" showDate="" listingFontSize="" showZebraStripes="" filterTableStyle="" filterTableCaptionStyle="" filterTableItemStyle="" nowDisplayFormat="" measureLocation="columns" hideMeasures="1" backgroundImage="" backgroundOpacity=".12">
+  <rowAxisOptions spec="" key="" value="" text="" headEnabled="false" headCount="" filterEnabled="false" filterExpression="" orderEnabled="false" orderExpression="" orderDirection="BDESC" aggEnabled="false" aggFunction="" aggFunctionParm="" levelCaption="" levelFormat="" levelSummary="" levelType="" drillLevel="0" advanced="false" levelStyle="" levelHeaderStyle="" suppress8020="false" drilldownSpec="" enabled="true">
+  </rowAxisOptions>
+  <columnAxisOptions spec="" key="" value="" text="" headEnabled="false" headCount="" filterEnabled="false" filterExpression="" orderEnabled="false" orderExpression="" orderDirection="BDESC" aggEnabled="false" aggFunction="" aggFunctionParm="" levelCaption="" levelFormat="" levelSummary="" levelType="" drillLevel="0" advanced="false" levelStyle="" levelHeaderStyle="" suppress8020="false" drilldownSpec="" enabled="true">
+  </columnAxisOptions>
+  <rowLevel spec="[TimeDataDim].[H1].[YMD hms].Members" key="" value="" text="YMD hms" headEnabled="false" headCount="" filterEnabled="false" filterExpression="" orderEnabled="false" orderExpression="" orderDirection="BDESC" aggEnabled="false" aggFunction="" aggFunctionParm="" levelCaption="" levelFormat="" levelSummary="" levelType="" drillLevel="0" advanced="false" levelStyle="" levelHeaderStyle="" suppress8020="false" drilldownSpec="" enabled="true">
+  </rowLevel>
+  <filter spec="[MyDate].[H1].[Day].Members" key="&amp;[64615]" value="" text="2017-11-28" headEnabled="false" headCount="" filterEnabled="false" filterExpression="" orderEnabled="false" orderExpression="" orderDirection="BDESC" aggEnabled="false" aggFunction="" aggFunctionParm="" levelCaption="" levelFormat="" levelSummary="" levelType="" drillLevel="0" advanced="false" levelStyle="" levelHeaderStyle="" suppress8020="false" drilldownSpec="" enabled="false">
+  </filter>
+  <measure spec="[Measures].[ResultNumeric]" key="" value="" text="ResultNumeric" headEnabled="false" headCount="" filterEnabled="false" filterExpression="" orderEnabled="false" orderExpression="" orderDirection="BDESC" aggEnabled="false" aggFunction="" aggFunctionParm="" levelCaption="" levelFormat="" levelSummary="" levelType="" drillLevel="0" advanced="false" levelStyle="" levelHeaderStyle="" suppress8020="false" drilldownSpec="" enabled="true">
+  </measure>
+</pivot>
+</Document></Export>
