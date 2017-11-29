@@ -9,8 +9,6 @@ The files contain a cube with mock data to quickly test the portlet.
 
 ### Content
 SourceCube cube and a portlet showing a chart based on Amcharts. The x-axis of the chart is based on date-time (eg "2017-11-12 09:18:00") and it also works with time dimensions based on date, months (less nice).
-The motivation to create this portlet was that at the time of writing plotting time on the x-axis with DeepSee is not sufficiently good (cf ProdLog 149466). For example, there are issues with the x-axis showing gaps and not getting nice limits (which default to years), axis labels are half hidden, etc.
-
 
 ### Instructions
 #### Programmatic import from Caché console
