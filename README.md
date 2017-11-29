@@ -16,12 +16,14 @@ SourceCube cube and a portlet showing a chart based on Amcharts. The x-axis of t
 #### Programmatic import from Caché console
 ```
 Set path="/your/path/"
-W $system.OBJ.Load(path_"SourceCube.xml","cf")
-W ##class(Ale.Source).GenerateData(1000,3) //1000 facts in the last 3 days
-W ##class(%DeepSee.Utils).BuildCube("SourceCube",1,1)
+W $system.OBJ.Load(path_"SourceCube.xml","cf")  //source, cube, pivot
+W ##class(Ale.Source).GenerateData(1000,3)  //1000 facts in the last 3 days
+W ##class(%DeepSee.Utils).%BuildCube("SourceCube",1,1)
+W ##class(%DeepSee.TermList).%ImportCSV(path_"SourceCube colspec.txt") //termlist
+W $system.OBJ.Load(path_"Ale.PortletAmchartsREST.xml","cf")
 W $system.OBJ.Load(path_"Ale.PortletAmcharts.xml","cf")
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST-dashboard.xml")
 Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts-dashboard.xml")
-W ##class(%DeepSee.TermList).%ImportCSV(path_"SourceCube colspec.txt")
 ```
 
 #### Manual import
@@ -29,11 +31,11 @@ W ##class(%DeepSee.TermList).%ImportCSV(path_"SourceCube colspec.txt")
 2) Generate source data and build the cube:
 ```
 W ##class(Ale.Source).GenerateData(100,3) //100 facts in the last 3 days
-W ##class(%DeepSee.Utils).BuildCube("SourceCube",1,1)
+W ##class(%DeepSee.Utils).%BuildCube("SourceCube",1,1)
 ```
-3) Import the portlet class Ale.PortletAmcharts.xml in studio;
-4) Import the pivot based on SourceCube and the dashboard in PortletAmcharts.dashboardpivot.xml;
-5) Import the termlist SourceCube colspec.txt to use the Choose Column Spec control;
+3) Import the termlist SourceCube colspec.txt to use the Choose Column Spec control;
+4) Import the portlet class Ale.PortletAmchartsREST.xml in studio;
+5) Import the portlet class Ale.PortletAmcharts.xml in studio;
 6) Open the PortletAmcharts dashboard.
 
 
