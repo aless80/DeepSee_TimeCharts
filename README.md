@@ -35,8 +35,6 @@ W ##class(%DeepSee.Utils).BuildCube("SourceCube",1,1)
 6) Open the PortletAmcharts dashboard.
 
 
-### Issues
-The default filter control is not used when you first load the dashboard. This has been ProdLogged
-
-
 ### Limitations
+The default filter control is not used when you first load the dashboard. This has been ProdLogged.
+The current implementation of onApplyFilters calls renderContents. This makes the filters work but renderContents runs two times at startup. This has to be ProdLogged. 
