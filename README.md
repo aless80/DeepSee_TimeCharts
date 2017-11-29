@@ -2,10 +2,8 @@
 A DeepSee portlet to chart dates and times using [Amcharts](https://www.amcharts.com/)
 
 ### Description
-Time charts in DeepSee do not yet provide a satisfactory solution for charting a dimensions with date and time.
-In this project I build a portlet using 3rd party tools for charting date and time.
+This project shows a portlet using 3rd party tools for charting date and time.
 The files contain a cube with mock data to quickly test the portlet.
-
 
 ### Content
 SourceCube cube and a portlet showing a chart based on Amcharts. The x-axis of the chart is based on date-time (eg "2017-11-12 09:18:00") and it also works with time dimensions based on date, months (less nice).
@@ -41,3 +39,6 @@ W ##class(%DeepSee.Utils).BuildCube("SourceCube",1,1)
 ### Limitations
 The default filter control is not used when you first load the dashboard. This has been ProdLogged.  
 The current implementation of onApplyFilters calls renderContents. This makes the filters work but renderContents runs two times at startup. This has to be ProdLogged.
+
+### InterSystems Documentation on portlets
+[Creating Portlets for Use in Dashboards](http://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=D2IMP_ch_portlets)
