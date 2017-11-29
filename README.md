@@ -13,8 +13,9 @@ The motivation to create this portlet was that at the time of writing plotting t
 
 
 ### Instructions
-#### Programmatic import
-```Set path="/home/amarin/intersystems/Perforce/workspace_amarin/Users/amarin/PortletAmcharts/"
+#### Programmatic import from Caché console
+```
+Set path="/your/path/"
 W $system.OBJ.Load(path_"SourceCube.xml","cf")
 W ##class(Ale.Source).GenerateData(1000,3) //1000 facts in the last 3 days
 W ##class(%DeepSee.Utils).BuildCube("SourceCube",1,1)
