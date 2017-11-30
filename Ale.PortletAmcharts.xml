@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-11-28 15:59:24">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 740)" ts="2017-11-29 20:39:25">
 <Class name="Ale.PortletAmcharts">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64615,57451.163872</TimeChanged>
+<TimeChanged>64616,74322.592329</TimeChanged>
 <TimeCreated>64594,80930.104007</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -87,7 +87,7 @@ This should be overridden in subclasses.</Description>
  Set pInfo($I(pInfo)) = $LB("FILLCOLOR","red","DRILL^Red:red,Blue:blue,Purple:purple,Yellow:yellow,Green:green","Chart Color","Chart color")
  Set pInfo($I(pInfo)) = $LB("BULLET","red","DRILL^none:none,round:round,square:square,triangleUp:triangleUp,triangleDown:triangleDown,bubble:bubble","Bullet","Bullet shape")
  Set pInfo($I(pInfo)) = $LB("BULLETSIZE","6","%Integer","Bullet size","Size of bullet in the chart")
- Set pInfo($I(pInfo)) = $LB("AMEXPORT","false","ENUM^true:1,false:0","Enable Export","Enable Export") 
+ Set pInfo($I(pInfo)) = $LB("AMEXPORT","false","ENUM^true:1,false:0","Enable Export","Enable Export")
  Quit pInfo
 ]]></Implementation>
 </Method>
@@ -99,7 +99,7 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
-	console.log('onApplyFilters')    
+	console.log('onApplyFilters')
     //widget.applyFilters(false) //infinite loop with onApplyFilters, with both true and false
 	var portlet = widget.findComponent('portlet');
    	this.renderContents(widget,portlet);
@@ -129,7 +129,6 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
 	console.log('renderContents')
-	console.log(arguments.callee.caller);
 	//Get the widget and portlet objects
 	var widgetIdArray = this.id.split("/")
 	var widgetId = widgetIdArray[0]
@@ -139,9 +138,9 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	if (!portlet) {
 		portlet = widget.findComponent('portlet');
 	}
-	//Quit if the portlet object was not found. This happens during the initial server load 
+	//Quit if the portlet object was not found. This happens during the initial server load
 	//when renderContents gets called before it is time to load the data
-	if (!portlet) {		
+	if (!portlet) {
 		this.getEnclosingDiv().innerHTML = "";
 		return true;
 	}
@@ -157,45 +156,97 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	chartdiv.style.width = this.chartwidth+'%';
     chartdiv.style.height = this.chartheight+'%';
     chartdiv.style.visibility = 'visible'
-	//Initialize variables to create a connection
+	//Get the query
 	var query = controller.GetCurrentQueryText();
 	console.log('The MDX query is:\n'+query)
-    var host = 'http://' + window.location.host;
-    var connection = new DeepSeeConnection("","",host,"/api/deepsee/v1","SAMPLES");
-    //Create the DeepSeeResultSet object with the connection..
-    var resultSet = new DeepSeeResultSet(connection,widgetId);
-    //..which uses the drawChart method to go throught the results and create the Amcharts chart in chartdiv
-    //Notice that .bind is used to pass the scope of renderContents to drawChart    
-    resultSet.runMDXQuery(query,this.drawChart.bind(this), this.drawChart.bind(this));
-    //I find that the previous responds better than this:
-    //resultSet.runMDXQuery(query,this.drawChart.bind(this));
+    
+    /*
+    var i = 10
+    var y = controller.getDataAsArrays()[i]
+    var header_col = controller.getColumnDescriptors()[0].caption
+    var header_row = controller.getRowCaptions()
+	//var x = controller.data.axes[1]["tuples"] //the next is simpler
+	var date = controller.getLabel(i,1)
+	*/
+    
+    //test from browser p=zenPage.getComponentById("$widget_1/portlet"); controller=p.getController()
+    var chartData = []
+    var cols = controller.getDataAsArrays()[0]
+    
+    
+    for (var i = 0; i < cols.length; ++i) {
+	    var date = controller.getLabel(i,1);
+	    chartData.push({
+		    date: date,
+		    y: cols[i]
+		 }) };  
+	 console.log(chartData)
+	 this.drawChart(controller, chartData)
+	 
+    //Create the resultSet object
+
+    //var contents = portlet.runMDXQuery(query,widgetId);
+
+    //Method getContents(pPivot As %String, widgetId As %String) As %String [ ZenMethod ]
+    //is called as 
+    //var contents = portlet.getContents(query,widgetId); //Jon has pivot instead of query
+    //var contents = portlet.runMDXQuery(query)
+    //contents is a string, which I think is a json
+    //which calls
+    //ClassMethod runMDXQuery(pPivot As %ZEN.proxyObject, Output pResultsByRef As %DeepSee.ResultSet) As %Status [ Internal ]
+    //as
+    //$$$THROWONERROR(tSC,..runMDXQuery(tPivotObj, .tResults))
 ]]></Implementation>
 </Method>
 
 <UDLText name="T">
 <Content><![CDATA[
-/*ClientMethod pendingCallback() [ Language = javascript ]
+/*Method getContents(MDX As %String, widgetId As %String) As %String [ ZenMethod ]
 {
-	var p = document.createElement('p');
-	p.textContent="No data!"
-    p.style.visibility = 'visible';	
-	var div=document.getElementById('chartdiv')
-	div.innerHTML = ""
-	div.appendChild(p)
-}*/
+	Do ..runMDXQuery(MDX, .tResults)
+	//Do ..addResultSetToPivot(.tPivotObj, tResults))
+	//addResultSetToPivot(pPivotByRef As %ZEN.proxyObject, pResults As %DeepSee.ResultSet) As %Status [ Internal ]
+	//tResults As %ZEN.proxyObject = ##class(%ZEN.proxyObject).%New()
+	Set tResults.axisCount =  pResults.%GetAxisCount()
+	For i=1:1:tResults.axisCount {
+		Set axissize(i)=pResults.%GetAxisSize(i)
+    }
+    Set tResults.axissize=axissize(1)
+	..
+	
+	
+	
+	Quit tContents
+}
+
+/// runMDXQuery runs the DeepSee query and returns back a %DeepSee.ResultSet
+ClassMethod runMDXQuery(MDX As %String, Output pResultsByRef As %DeepSee.ResultSet) As %Status
+{
+	Try {
+	    Set pResultsByRef = ##class(%DeepSee.ResultSet).%New()
+	    Set tSC = pResultsByRef.%PrepareMDX(MDX)
+	    //Multi-process query execution but still synchronous
+	    #; Note, this is a synchronous method which will only use one process to perform,
+    	#; the recommended way is the asynch with wait til complete before continuing.
+    	Set tSC = pResultsByRef.%ExecuteAsynch(MDX,,1)
+    	//{date: "2017-11-27 00:05:00", y: 3}
+ 	} Catch(ex) {
+    	Set tSC = ex.AsStatus()
+    	//Write "Failed to Run MDX, Error: ",$System.Status.GetOneStatusText(tSC,1)
+ 	}
+ 	Quit tSC
+}
+*/
 ]]></Content>
 </UDLText>
 
 <Method name="drawChart">
-<FormalSpec>resultSet</FormalSpec>
+<FormalSpec>resultSet,chartData</FormalSpec>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
 	console.log('drawChart')
-	console.log(arguments.callee.caller.caller.caller);
-	//window.caller=arguments.callee.caller
-	
-	var chartDataPoint;
+	/*var chartDataPoint;
 	var chartLabel;
 	var chartData = [];
 	//Populate chartData needed for AmCharts from resultSet
@@ -213,9 +264,11 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	}
 	console.timeEnd('resultSet loop');
 	console.log(chartData)
-	var columnLabel = resultSet.getOrdinalLabel(1,1);
-	//AmChart code	
-	if (typeof AmCharts=="undefined")  { 
+	*/
+	//var columnLabel = resultSet.getOrdinalLabel(1,1);
+	var columnLabel = "hey"
+	//AmChart code
+	if (typeof AmCharts=="undefined")  {
 		alert('Please download amCharts JavaScript Charts (http://www.amcharts.com/download/) and place the "amcharts" directory in /csp/broker/  ');
 		return;
 	}

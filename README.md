@@ -22,8 +22,8 @@ W ##class(%DeepSee.Utils).%BuildCube("SourceCube",1,1)
 W ##class(%DeepSee.TermList).%ImportCSV(path_"SourceCube colspec.txt") //termlist
 W $system.OBJ.Load(path_"Ale.PortletAmchartsREST.xml","cf")
 W $system.OBJ.Load(path_"Ale.PortletAmcharts.xml","cf")
-Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST-dashboard.xml")
-Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts-dashboard.xml")
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST-dashboard.xml",1)
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts-dashboard.xml",1)
 ```
 
 #### Manual import
