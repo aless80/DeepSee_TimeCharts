@@ -15,7 +15,7 @@ SourceCube cube and a portlet showing a chart based on Amcharts. The x-axis of t
 ### Instructions
 #### Programmatic import from Caché console
 ```
-Set path="/your/path/"
+Set path="/home/amarin/DeepSee_TimeCharts/"  //Set your path
 W $system.OBJ.Load(path_"SourceCube.xml","cf")  //source, cube, pivot
 W ##class(Ale.Source).GenerateData(1000,3)  //1000 facts in the last 3 days
 W ##class(%DeepSee.Utils).%BuildCube("SourceCube",1,1)

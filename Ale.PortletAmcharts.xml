@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 740)" ts="2017-11-29 20:39:25">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-01 17:39:03">
 <Class name="Ale.PortletAmcharts">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64616,74322.592329</TimeChanged>
+<TimeChanged>64618,54950.028249</TimeChanged>
 <TimeCreated>64594,80930.104007</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -172,8 +172,6 @@ When filters get applied to the portlet, re-query the data from the pivot with t
     //test from browser p=zenPage.getComponentById("$widget_1/portlet"); controller=p.getController()
     var chartData = []
     var cols = controller.getDataAsArrays()[0]
-    
-    
     for (var i = 0; i < cols.length; ++i) {
 	    var date = controller.getLabel(i,1);
 	    chartData.push({
@@ -241,7 +239,7 @@ ClassMethod runMDXQuery(MDX As %String, Output pResultsByRef As %DeepSee.ResultS
 </UDLText>
 
 <Method name="drawChart">
-<FormalSpec>resultSet,chartData</FormalSpec>
+<FormalSpec>controller,chartData</FormalSpec>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
@@ -265,8 +263,8 @@ ClassMethod runMDXQuery(MDX As %String, Output pResultsByRef As %DeepSee.ResultS
 	console.timeEnd('resultSet loop');
 	console.log(chartData)
 	*/
-	//var columnLabel = resultSet.getOrdinalLabel(1,1);
-	var columnLabel = "hey"
+	//var columnLabel = controller.getOrdinalLabel(1,1);
+	var columnLabel = controller.getColumnDescriptors()[0].caption
 	//AmChart code
 	if (typeof AmCharts=="undefined")  {
 		alert('Please download amCharts JavaScript Charts (http://www.amcharts.com/download/) and place the "amcharts" directory in /csp/broker/  ');
