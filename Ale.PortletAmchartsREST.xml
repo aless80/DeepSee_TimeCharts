@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-05 16:05:16">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-05 16:58:48">
 <Class name="Ale.PortletAmchartsREST">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64622,57851.865853</TimeChanged>
+<TimeChanged>64622,61084.16827</TimeChanged>
 <TimeCreated>64616,42792.431235</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -63,6 +63,12 @@ Enable Export of chart</Description>
 <Type>%Boolean</Type>
 </Property>
 
+<Property name="namespace">
+<Description>
+Namespace for the connection</Description>
+<Type>%String</Type>
+</Property>
+
 <Method name="%OnGetPortletName">
 <Description>
 Return the localized caption of this portlet.
@@ -85,7 +91,7 @@ This should be overridden in subclasses.</Description>
  Set pInfo($I(pInfo)) = $LB("FILLALPHAS","0.5","%Numeric","Area Transparency","Set the transparency of the area plot [0 to 1]")
  Set pInfo($I(pInfo)) = $LB("LINECOLOR","red","DRILL^Red:red,Black:black,Blue:blue,Purple:purple,Yellow:yellow,Green:green","Line Color","Line color")
  Set pInfo($I(pInfo)) = $LB("FILLCOLOR","red","DRILL^Red:red,Blue:blue,Purple:purple,Yellow:yellow,Green:green","Chart Color","Chart color")
- Set pInfo($I(pInfo)) = $LB("BULLET","red","DRILL^none:none,round:round,square:square,triangleUp:triangleUp,triangleDown:triangleDown,bubble:bubble","Bullet","Bullet shape")
+ Set pInfo($I(pInfo)) = $LB("BULLET","bubble","DRILL^none:none,round:round,square:square,triangleUp:triangleUp,triangleDown:triangleDown,bubble:bubble","Bullet","Bullet shape")
  Set pInfo($I(pInfo)) = $LB("BULLETSIZE","6","%Integer","Bullet size","Size of bullet in the chart")
  Set pInfo($I(pInfo)) = $LB("AMEXPORT","false","ENUM^true:1,false:0","Enable Export","Enable Export") 
  Quit pInfo
@@ -118,6 +124,8 @@ When filters get applied to the portlet, re-query the data from the pivot with t
   Set ..fillcolor = ..settings("FILLCOLOR")
   Set ..bullet = ..settings("BULLET")
   Set ..bulletsize = ..settings("BULLETSIZE")
+  //Get the namespace
+  Set ..namespace = $NAMESPACE
   //Show a message while loading
   &html< <div id="chartdiv">Content is loading...</div>	>
 ]]></Implementation>
@@ -161,7 +169,7 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	var query = controller.GetCurrentQueryText();
 	console.log('The MDX query is:\n'+query)
     var host = window.location.protocol + '//' + window.location.host;
-    var connection = new DeepSeeConnection("","",host,"/api/deepsee/v1","SAMPLES");
+    var connection = new DeepSeeConnection("","",host,"/api/deepsee/v1", this.namespace);
     //Create the DeepSeeResultSet object with the connection..
     var resultSet = new DeepSeeResultSet(connection,widgetId);
     //..which uses the drawChart method to go throught the results and create the Amcharts chart in chartdiv
