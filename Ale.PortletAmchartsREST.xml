@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 740)" ts="2017-11-29 11:54:31">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-05 16:05:16">
 <Class name="Ale.PortletAmchartsREST">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64616,42806.943304</TimeChanged>
+<TimeChanged>64622,57851.865853</TimeChanged>
 <TimeCreated>64616,42792.431235</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -160,7 +160,7 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	//Initialize variables to create a connection
 	var query = controller.GetCurrentQueryText();
 	console.log('The MDX query is:\n'+query)
-    var host = 'http://' + window.location.host;
+    var host = window.location.protocol + '//' + window.location.host;
     var connection = new DeepSeeConnection("","",host,"/api/deepsee/v1","SAMPLES");
     //Create the DeepSeeResultSet object with the connection..
     var resultSet = new DeepSeeResultSet(connection,widgetId);
