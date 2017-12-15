@@ -1,0 +1,6 @@
+%%NAME,PATIENTS COLSPECS
+%%MODDATE,2017-12-15 12:27:22
+Age,[Measures].[Age]
+Allergy Count,[Measures].[Allergy Count]
+Patient Count,[Measures].%COUNT
+Test Score,[Measures].[Test Score]

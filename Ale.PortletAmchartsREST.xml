@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-05 16:58:48">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-06 13:25:23">
 <Class name="Ale.PortletAmchartsREST">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64622,61084.16827</TimeChanged>
+<TimeChanged>64623,48294.112372</TimeChanged>
 <TimeCreated>64616,42792.431235</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -180,20 +180,6 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 ]]></Implementation>
 </Method>
 
-<UDLText name="T">
-<Content><![CDATA[
-/*ClientMethod pendingCallback() [ Language = javascript ]
-{
-	var p = document.createElement('p');
-	p.textContent="No data!"
-    p.style.visibility = 'visible';	
-	var div=document.getElementById('chartdiv')
-	div.innerHTML = ""
-	div.appendChild(p)
-}*/
-]]></Content>
-</UDLText>
-
 <Method name="drawChart">
 <FormalSpec>resultSet</FormalSpec>
 <Language>javascript</Language>
@@ -280,17 +266,7 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 			"dateFormat": "YYYY-MM-DD HH:NN:SS"
 		}
 	});
-	/*
-	chart.addListener("dataUpdated", zoomChart);
-	// when we apply theme, the dataUpdated event is fired even before we add listener, so
-	// we need to call zoomChart here
-	zoomChart();
-	// this method is called when chart is first inited as we listen for "dataUpdated" event
-	function zoomChart() {
-		// different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-		chart.zoomToIndexes(chartData.length - 250, chartData.length - 100);
-	}
-	*/
+	//Show message if no data
 	if (chart.dataProvider === undefined || chart.dataProvider.length === 0) {
 		chart.addLabel("50%", "50%", "The chart contains no data", "middle", 15);
 	}

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-05 16:27:49">
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2017.2 (Build 744)" ts="2017-12-12 10:30:28">
 <Class name="Ale.PortletAmcharts">
 <Super>%DeepSee.Component.Portlet.abstractPortlet</Super>
-<TimeChanged>64622,59232.476353</TimeChanged>
+<TimeChanged>64623,48636.419598</TimeChanged>
 <TimeCreated>64594,80930.104007</TimeCreated>
 
 <Parameter name="INCLUDEFILES">
@@ -100,7 +100,6 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
 	console.log('onApplyFilters')
-    //widget.applyFilters(false) //infinite loop with onApplyFilters, with both true and false
 	var portlet = widget.findComponent('portlet');
    	this.renderContents(widget,portlet);
 ]]></Implementation>
@@ -159,111 +158,29 @@ When filters get applied to the portlet, re-query the data from the pivot with t
 	//Get the query
 	var query = controller.GetCurrentQueryText();
 	console.log('The MDX query is:\n'+query)
-    
-    /*
-    var i = 10
-    var y = controller.getDataAsArrays()[i]
-    var header_col = controller.getColumnDescriptors()[0].caption
-    var header_row = controller.getRowCaptions()
-	//var x = controller.data.axes[1]["tuples"] //the next is simpler
-	var date = controller.getLabel(i,1)
-	*/
-    
-    //test from browser p=zenPage.getComponentById("$widget_1/portlet"); controller=p.getController()
+    //Get the data from the controller..
     var chartData = []
-    var cols = controller.getDataAsArrays()[0]
-    for (var i = 0; i < cols.length; ++i) {
-	    var date = controller.getLabel(i,1);
-	    chartData.push({
-		    date: date,
-		    y: cols[i]
-		 }) };  
-	 console.log(chartData)
-	 this.drawChart(controller, chartData)
-	 
-    //Create the resultSet object
-
-    //var contents = portlet.runMDXQuery(query,widgetId);
-
-    //Method getContents(pPivot As %String, widgetId As %String) As %String [ ZenMethod ]
-    //is called as 
-    //var contents = portlet.getContents(query,widgetId); //Jon has pivot instead of query
-    //var contents = portlet.runMDXQuery(query)
-    //contents is a string, which I think is a json
-    //which calls
-    //ClassMethod runMDXQuery(pPivot As %ZEN.proxyObject, Output pResultsByRef As %DeepSee.ResultSet) As %Status [ Internal ]
-    //as
-    //$$$THROWONERROR(tSC,..runMDXQuery(tPivotObj, .tResults))
+ 	var cols = controller.getDataAsArrays()[0]
+    if (cols[0]) {
+    	for (var i = 0; i < cols.length; ++i) {
+	    	var date = controller.getLabel(i,1);
+	    	chartData.push({
+		    	date: date,
+		    	y: cols[i]
+		 	}) };  
+	 	console.log(chartData)
+    } 
+    //..and pass it to amcharts
+    this.drawChart(controller, chartData)
 ]]></Implementation>
 </Method>
-
-<UDLText name="T">
-<Content><![CDATA[
-/*Method getContents(MDX As %String, widgetId As %String) As %String [ ZenMethod ]
-{
-	Do ..runMDXQuery(MDX, .tResults)
-	//Do ..addResultSetToPivot(.tPivotObj, tResults))
-	//addResultSetToPivot(pPivotByRef As %ZEN.proxyObject, pResults As %DeepSee.ResultSet) As %Status [ Internal ]
-	//tResults As %ZEN.proxyObject = ##class(%ZEN.proxyObject).%New()
-	Set tResults.axisCount =  pResults.%GetAxisCount()
-	For i=1:1:tResults.axisCount {
-		Set axissize(i)=pResults.%GetAxisSize(i)
-    }
-    Set tResults.axissize=axissize(1)
-	..
-	
-	
-	
-	Quit tContents
-}
-
-/// runMDXQuery runs the DeepSee query and returns back a %DeepSee.ResultSet
-ClassMethod runMDXQuery(MDX As %String, Output pResultsByRef As %DeepSee.ResultSet) As %Status
-{
-	Try {
-	    Set pResultsByRef = ##class(%DeepSee.ResultSet).%New()
-	    Set tSC = pResultsByRef.%PrepareMDX(MDX)
-	    //Multi-process query execution but still synchronous
-	    #; Note, this is a synchronous method which will only use one process to perform,
-    	#; the recommended way is the asynch with wait til complete before continuing.
-    	Set tSC = pResultsByRef.%ExecuteAsynch(MDX,,1)
-    	//{date: "2017-11-27 00:05:00", y: 3}
- 	} Catch(ex) {
-    	Set tSC = ex.AsStatus()
-    	//Write "Failed to Run MDX, Error: ",$System.Status.GetOneStatusText(tSC,1)
- 	}
- 	Quit tSC
-}
-*/
-]]></Content>
-</UDLText>
 
 <Method name="drawChart">
 <FormalSpec>controller,chartData</FormalSpec>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
-	console.log('drawChart')
-	/*var chartDataPoint;
-	var chartLabel;
-	var chartData = [];
-	//Populate chartData needed for AmCharts from resultSet
-	console.time('resultSet loop');
-	for (var i = 1; i <= resultSet.getRowCount(); ++i) {
-		for (var j = 1; j <= resultSet.getColumnCount(); ++j) {
-			chartDataPoint = resultSet.getOrdinalValue(i,j);
-			chartLabel = resultSet.getOrdinalLabel(2,i); //label of member on rows
-			chartData[chartData.length] = { "date":chartLabel[0],"y":chartDataPoint};
-		}
-	}
-	//If no data, get rid of data array containg empty/undefined values
-	if ((resultSet.parsedData.Result.CellData.length == 1) && (resultSet.parsedData.Result.CellData[0]["ValueLogical"]=="")) {
-		chartData=[];
-	}
-	console.timeEnd('resultSet loop');
-	console.log(chartData)
-	*/
-	//var columnLabel = controller.getOrdinalLabel(1,1);
+	console.log('drawChart')	
 	var columnLabel = controller.getColumnDescriptors()[0].caption
 	//AmChart code
 	if (typeof AmCharts=="undefined")  {
@@ -323,17 +240,7 @@ ClassMethod runMDXQuery(MDX As %String, Output pResultsByRef As %DeepSee.ResultS
 			"dateFormat": "YYYY-MM-DD HH:NN:SS"
 		}
 	});
-	/*
-	chart.addListener("dataUpdated", zoomChart);
-	// when we apply theme, the dataUpdated event is fired even before we add listener, so
-	// we need to call zoomChart here
-	zoomChart();
-	// this method is called when chart is first inited as we listen for "dataUpdated" event
-	function zoomChart() {
-		// different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-		chart.zoomToIndexes(chartData.length - 250, chartData.length - 100);
-	}
-	*/
+	//Show message if no data
 	if (chart.dataProvider === undefined || chart.dataProvider.length === 0) {
 		chart.addLabel("50%", "50%", "The chart contains no data", "middle", 15);
 	}

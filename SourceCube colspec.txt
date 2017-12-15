@@ -1,4 +1,0 @@
-%%NAME,SourceCube colspec
-%%MODDATE,2017-11-15 16:01:33
-ResultID,[Measures].[ResultID]
-ResultNumeric,[Measures].[ResultNumeric]
