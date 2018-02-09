@@ -17,14 +17,16 @@ Patients2 cube and a portlet showing a chart based on Amcharts. The x-axis of th
 ```
 ZN "SAMPLES"
 Set path="/home/amarin/DeepSee_TimeCharts/"  //Set your path
-W $system.OBJ.Load(path_"PatientsCube2.xml","cf")  //import the Patients2 cube
+W $system.OBJ.Load(path_"DeepSee.Model.PatientsCube2.cls","cf")  //import the Patients2 cube
 W ##class(%DeepSee.Utils).%BuildCube("Patients2",1,1)
 W ##class(%DeepSee.TermList).%ImportCSV(path_"PATIENTS COLSPECS.txt") //termlist
-W $system.OBJ.Load(path_"Ale.PortletAmcharts.xml","cf")
-W $system.OBJ.Load(path_"Ale.PortletAmchartsREST.xml","cf")
-Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts-dashboard.xml",1)
-Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST-dashboard.xml",1)
+W $system.OBJ.Load(path_"Ale.PortletAmcharts.cls","cf")
+W $system.OBJ.Load(path_"Ale.PortletAmchartsREST.cls","cf")
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts.dashboard.DFI",1)
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST.dashboard.DFI",1)
 ```
+
+If your instance does not support UDL formatting please use the .xml files in the xml directory.
 
 #### Manual import
 1) In the SAMPLES namespace import the Patients2 cube in PatientsCube2.xml. This file contains the cube class for Patients2;
