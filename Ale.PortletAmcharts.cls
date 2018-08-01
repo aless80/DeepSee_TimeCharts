@@ -178,7 +178,7 @@ ClientMethod drawChart(controller, chartData) [ Language = javascript ]
 		},
 		"categoryField": "date",
 		"categoryAxis": {
-			"minPeriod": "mm",
+			"minPeriod": "hh",
 			"parseDates": true,
 			"showFirstLabel": false
 		},
