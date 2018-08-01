@@ -44,4 +44,7 @@ W ##class(%DeepSee.Utils).%BuildCube("Patients2",1,1)
 
 ### Limitations
 The default filter control is not used when you first load the dashboard. This has been ProdLogged.  
-The current implementation of onApplyFilters calls renderContents. This makes the filters work but renderContents runs two times at startup. This has been ProdLogged.
+The current implementation of onApplyFilters calls renderContents. This makes the filters work but renderContents runs two times at startup. This has been ProdLogged.  
+The data should be sorted by date and be in the format "yyyy-mm-dd hh:mm:ss" eg "2018-07-27 14:25:41".  
+Only one chart/column is plotted  
+Buy a license from AmCharts to get rid of their tag on the top left of the graph
