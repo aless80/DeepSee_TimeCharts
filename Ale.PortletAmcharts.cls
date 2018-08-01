@@ -112,7 +112,7 @@ ClientMethod renderContents(widget, portlet) [ Language = javascript ]
     //Get the data from the controller..
     var chartData = []
  	var cols = controller.getDataAsArrays()[0]
-    if (cols[0]) {
+    if (Array.isArray(cols) && cols.length) {
     	for (var i = 0; i < cols.length; ++i) {
 	    	var date = controller.getLabel(i,1);
 	    	chartData.push({
@@ -123,12 +123,21 @@ ClientMethod renderContents(widget, portlet) [ Language = javascript ]
     } 
     //..and pass it to amcharts
     this.drawChart(controller, chartData)
+    
+    //Debugging help: 
+    //Make the controller and chartData variables available in the console
+	//window.chartData = chartData;
+	//window.controller = controller;
 }
 
+/// NB it is assumed that dates are in the format yyyy-mm-dd hh:mm:ss and that they are sorted chronologically
 ClientMethod drawChart(controller, chartData) [ Language = javascript ]
 {
 	console.log('drawChart')	
+	//Get the column label from DeepSee
 	var columnLabel = controller.getColumnDescriptors()[0].caption
+	//Set the minimum date to midnight of the first day in the data
+	var minimumDate = chartData[0].date.slice(0,11)+'00:00:00';
 	//AmChart code
 	if (typeof AmCharts=="undefined")  {
 		alert('Please download amCharts JavaScript Charts (http://www.amcharts.com/download/) and place the "amcharts" directory in /csp/broker/  ');
@@ -142,7 +151,7 @@ ClientMethod drawChart(controller, chartData) [ Language = javascript ]
 		"valueAxes": [{
 			"position": "left",
 			"title": columnLabel,
-			"minimum":0,
+			"minimum":minimumDate,
 			"maximum":"undefined",
 			"showFirstLabel": true,
 			"autoGridCount": true,

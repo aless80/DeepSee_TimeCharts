@@ -127,6 +127,7 @@ ClientMethod renderContents(widget, portlet) [ Language = javascript ]
     //resultSet.runMDXQuery(query,this.drawChart.bind(this));
 }
 
+/// NB it is assumed that dates are in the format yyyy-mm-dd hh:mm:ss and that they are sorted chronologically
 ClientMethod drawChart(resultSet) [ Language = javascript ]
 {
 	console.log('drawChart')
@@ -152,6 +153,8 @@ ClientMethod drawChart(resultSet) [ Language = javascript ]
 	console.timeEnd('resultSet loop');
 	console.log(chartData)
 	var columnLabel = resultSet.getOrdinalLabel(1,1);
+	//Set the minimum date to midnight of the first day in the data
+	var minimumDate = chartData[0].date.slice(0,11)+'00:00:00';
 	//AmChart code	
 	if (typeof AmCharts=="undefined")  { 
 		alert('Please download amCharts JavaScript Charts (http://www.amcharts.com/download/) and place the "amcharts" directory in /csp/broker/  ');
@@ -165,7 +168,7 @@ ClientMethod drawChart(resultSet) [ Language = javascript ]
 		"valueAxes": [{
 			"position": "left",
 			"title": columnLabel,
-			"minimum":0,
+			"minimum":minimumDate,
 			"maximum":"undefined",
 			"showFirstLabel": true,
 			"autoGridCount": true,
