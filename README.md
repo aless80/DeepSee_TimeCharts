@@ -22,6 +22,7 @@ W ##class(%DeepSee.Utils).%BuildCube("Patients2",1,1)
 W ##class(%DeepSee.TermList).%ImportCSV(path_"PATIENTS COLSPECS.txt") //termlist
 W $system.OBJ.Load(path_"Ale.PortletAmcharts.cls","cf")
 W $system.OBJ.Load(path_"Ale.PortletAmchartsREST.cls","cf")
+Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"Patients2.pivot.DFI",1)
 Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmcharts.dashboard.DFI",1)
 Do ##class(%DeepSee.UserLibrary.Utils).%Import(path_"PortletAmchartsREST.dashboard.DFI",1)
 ```
@@ -36,8 +37,9 @@ W ##class(%DeepSee.Utils).%BuildCube("Patients2",1,1)
 ```
 3) Import the portlet class Ale.PortletAmchartsREST.xml in studio;
 4) Import the portlet class Ale.PortletAmcharts.xml in studio;
-5) Import the termlist PATIENTS COLSPECS.txt to be able to use the Choose Column Spec control on the dashboard;
-6) Open the PortletAmcharts and PortletAmchartsREST dashboards.
+5) Import the pivot Patients2.pivot.DFI;
+6) Import the termlist PATIENTS COLSPECS.txt to be able to use the Choose Column Spec control on the dashboard;
+7) Open the PortletAmcharts and PortletAmchartsREST dashboards.
 
 
 ### Limitations
